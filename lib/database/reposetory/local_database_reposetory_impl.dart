@@ -6,12 +6,13 @@ import 'package:sqflite/sqflite.dart';
 import '../../app/constants/strings.dart';
 import 'local_database_reposetory.dart';
 
-class LocalDatabaseReposetoryImpl extends LocalDatabaseReposetory {
+class LocalDatabaseReposetoryImpl implements LocalDatabaseReposetory {
   const LocalDatabaseReposetoryImpl();
 
   static Database? _database;
 
-  void initDB() async {
+  @override
+  Future<void> initDB() async {
     if (_database != null) return;
     //? lazily instantiate the db the first time it is accessed
     await connection()
@@ -23,7 +24,6 @@ class LocalDatabaseReposetoryImpl extends LocalDatabaseReposetory {
         );
   }
 
-  @override
   Future<Database> connection() async {
     final String path = await getDatabasesPath();
     final String databasesPath = join(path, databaseName);
@@ -34,7 +34,6 @@ class LocalDatabaseReposetoryImpl extends LocalDatabaseReposetory {
     );
   }
 
-  @override
   Future<void> createTable(Database db, int verstion) async {
     await db
         .execute(

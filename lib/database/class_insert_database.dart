@@ -1,16 +1,17 @@
 import 'package:store_app/app/constants/strings.dart';
+import 'package:store_app/database/reposetory/local_database_reposetory.dart';
 import 'package:store_app/database/reposetory/local_database_reposetory_impl.dart';
 import 'package:store_app/models/product_model.dart';
 
 mixin ExecuteInsertDB {
-  final LocalDatabaseReposetoryImpl _reposetoryImpl =
+  final LocalDatabaseReposetory _reposetory =
       const LocalDatabaseReposetoryImpl();
 
   Future<void> executeInsertIntoDatabase({
     required ProductModel product,
     required int quantity,
   }) =>
-      _reposetoryImpl.insertRecord(_fillInsertValues(product, quantity));
+      _reposetory.insertRecord(_fillInsertValues(product, quantity));
 }
 
 Map<String, Object?> _fillInsertValues(ProductModel product, int quantity) {

@@ -1,8 +1,9 @@
+import 'package:store_app/database/reposetory/local_database_reposetory.dart';
 import 'package:store_app/database/reposetory/local_database_reposetory_impl.dart';
 
 mixin ExecuteDeleteRecordsDB {
-  final LocalDatabaseReposetoryImpl _reposetoryImpl =
+  final LocalDatabaseReposetory _reposetory =
       const LocalDatabaseReposetoryImpl();
 
-  Future<void> executeDeleteAllRecords() => _reposetoryImpl.deleteRecords();
+  Future<void> executeDeleteAllRecords() => _reposetory.deleteRecords();
 }

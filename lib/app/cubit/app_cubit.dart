@@ -2,13 +2,9 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:store_app/app/injections_container/di.dart' as di;
+import 'package:store_app/database/local_database_services.dart';
 
-import '../../database/class_create_database.dart';
-import '../../database/class_delete_database.dart';
-import '../../database/class_delete_records_database.dart';
-import '../../database/class_insert_database.dart';
-import '../../database/class_read_database.dart';
-import '../../database/class_update_database.dart';
 import '../../helper/local/cache_helper.dart';
 import '../../models/card_model.dart';
 import '../../models/product_model.dart';
@@ -19,20 +15,15 @@ import '../functions/toast_snack_bar.dart';
 
 part 'app_state.dart';
 
-class AppCubit extends Cubit<AppStates>
-    with
-        ExecuteCreateDB,
-        ExecuteReadDB,
-        ExecuteInsertDB,
-        ExecuteUpdateDB,
-        ExecuteDeleteDB,
-        ExecuteDeleteRecordsDB {
+class AppCubit extends Cubit<AppStates> {
   AppCubit() : super(AppInitial());
   static AppCubit get(context) => BlocProvider.of<AppCubit>(context);
 
   final List<ProductModel> products = [];
   final List<dynamic> cachedFavorite =
       CacheHelper.getData(key: "Favorites") ?? [];
+
+  final _localDatabaseServices = di.instance.get<LocalDatabaseServices>();
 
   //* Executed when scrolling down in the product screen
   void refreshProducts() {
@@ -124,32 +115,38 @@ class AppCubit extends Cubit<AppStates>
   int quantity = 1;
 
   //* Initialize the database when the application is launched for the first time
-  void initLocalDB() => executeCreateLocalDatabase().then((_) => getProducts());
+  void initLocalDB() => _localDatabaseServices
+      .executeCreateLocalDatabase()
+      .then((_) => _getProductsFromDB());
 
   //* Delete all data in database when the user logout
-  void deleteProductsFromUserCard() =>
-      executeDeleteAllRecords().then((_) => cardUser.clear());
+  void deleteProductsFromUserCard() => _localDatabaseServices
+      .executeDeleteAllRecords()
+      .then((_) => cardUser.clear());
 
   //* Execute insert function into database
   void addToCard({required ProductModel product}) async {
-    await executeInsertIntoDatabase(product: product, quantity: quantity)
+    await _localDatabaseServices
+        .executeInsertIntoDatabase(product: product, quantity: quantity)
         .then((_) => _getProductsFromDB())
         .then((_) => emit(InsertDatabaseState()));
   }
 
   //* Update product quantity from the user card
   void updateProductQuantityFromUserCard({required int index}) async =>
-      await executeUpdateInDatabase(
-        id: cardUser[index].id,
-        quantity: quantityHelper[index],
-      )
+      await _localDatabaseServices
+          .executeUpdateInDatabase(
+            id: cardUser[index].id,
+            quantity: quantityHelper[index],
+          )
           .then((_) => _getProductsFromDB())
           .then((_) => emit(UpdateDatabaseState()));
 
   //* Delete product from the user card
   void deleteProductFromUserCard({required int index}) {
     quantityHelper.removeAt(index);
-    executeDelete(id: cardUser[index].id)
+    _localDatabaseServices
+        .executeDelete(id: cardUser[index].id)
         .then((_) => _getProductsFromDB())
         .then((_) => emit(DeleteDatabaseState()));
   }
@@ -157,7 +154,8 @@ class AppCubit extends Cubit<AppStates>
   //* Get products for the user card
   void _getProductsFromDB() async {
     cardUser.clear();
-    await executeReadeDataFromDatabase()
+    await _localDatabaseServices
+        .executeReadeDataFromDatabase()
         .then((products) => _fillCardUser(products))
         .then((_) => _calculatePriceAndQuantity());
   }

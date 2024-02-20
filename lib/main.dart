@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:store_app/app/injections_container/di.dart';
 
 import 'app/cubit/app_cubit.dart';
 import 'app/functions/check_login_function.dart';
@@ -13,7 +14,7 @@ import 'theme/themes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await initAppModules();
   await GetStorage.init();
   HttpOverrides.global = MyHttpOverrides();
   Bloc.observer = BlocObserverStoreApp();

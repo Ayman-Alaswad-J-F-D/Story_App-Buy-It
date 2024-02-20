@@ -1,11 +1,7 @@
-import 'package:sqflite/sqflite.dart';
-
 abstract class LocalDatabaseReposetory {
   const LocalDatabaseReposetory();
 
-  Future<Database> connection();
-
-  Future<void> createTable(Database db, int verstion);
+  Future<void> initDB();
 
   Future<List<Map<String, Object?>>> readRecords();
 
